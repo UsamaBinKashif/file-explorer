@@ -1,4 +1,5 @@
 import {
+  DeleteTwoTone,
   EditTwoTone,
   FileAddTwoTone,
   FileTextTwoTone,
@@ -12,17 +13,15 @@ import { useState } from "react";
 
 const mainStyles = {
   padding: "5px",
-  maxWidth: "400px",
+  maxWidth: "600px",
 };
-const fileStyles = {
-  padding: "5px",
-};
+
 const inputStyles = {
   width: "150px",
   margin: "5px",
 };
 
-const FileExplorer = ({ handleInsertNode, explorer }) => {
+const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
   const [expand, setExpand] = useState(false);
   const [showInput, setShowInput] = useState({
     visible: false,
@@ -46,6 +45,12 @@ const FileExplorer = ({ handleInsertNode, explorer }) => {
     }
   };
 
+  const handleDelete = (e) => {
+    e.stopPropagation();
+
+    handleDeleteNode(explorer?.id);
+  };
+
   if (explorer.isFolder) {
     return (
       <main style={mainStyles}>
@@ -54,15 +59,16 @@ const FileExplorer = ({ handleInsertNode, explorer }) => {
           onClick={() => setExpand((prev) => !prev)}
           gap="small"
           align="center"
+          
         >
-          <p style={fileStyles}>
+          <p >
             {" "}
             {!expand ? (
               <FolderTwoTone twoToneColor="#FFDB00" />
             ) : (
               <FolderOpenTwoTone twoToneColor="#FFDB00" />
             )}
-            <span style={{ marginLeft: "2px" }}>{explorer?.name}</span>
+            <span style={{ margin: "0 5px" }}>{explorer?.name}</span>
           </p>
           <Button
             type="default"
@@ -77,6 +83,13 @@ const FileExplorer = ({ handleInsertNode, explorer }) => {
             onClick={(e) => handleButton(e, false)}
           >
             Create File
+          </Button>
+          <Button
+            type="default"
+            icon={<DeleteTwoTone />}
+            onClick={(e) => handleDelete(e)}
+          >
+            Delete
           </Button>
         </Flex>
         {showInput?.visible && (
@@ -100,6 +113,7 @@ const FileExplorer = ({ handleInsertNode, explorer }) => {
             {explorer.items.map((item) => (
               <>
                 <FileExplorer
+                  handleDeleteNode={handleDeleteNode}
                   handleInsertNode={handleInsertNode}
                   explorer={item}
                   key={item?.id}
@@ -113,10 +127,19 @@ const FileExplorer = ({ handleInsertNode, explorer }) => {
   } else
     return (
       <Flex vertical gap="small">
-        <p className="file" style={fileStyles}>
-          <FileTextTwoTone />
-          <span style={{ marginLeft: "2px" }}>{explorer?.name}</span>
-        </p>
+        <Flex align="center">
+          <p className="file" >
+            <FileTextTwoTone />
+            <span style={{ margin: "0 5px" }}>{explorer?.name}</span>
+          </p>
+          <Button
+            type="default"
+            icon={<DeleteTwoTone twoToneColor="#ff0000" />}
+            onClick={(e) => handleDelete(e)}
+          >
+            Delete
+          </Button>
+        </Flex>
       </Flex>
     );
 };
@@ -125,7 +148,7 @@ export default FileExplorer;
 
 FileExplorer.propTypes = {
   explorer: PropTypes.shape({
-    key:PropTypes.string,
+    key: PropTypes.string,
     id: PropTypes.string,
     isFolder: PropTypes.bool,
     name: PropTypes.string,
@@ -139,4 +162,5 @@ FileExplorer.propTypes = {
     ),
   }),
   handleInsertNode: PropTypes.func,
+  handleDeleteNode: PropTypes.func,
 };

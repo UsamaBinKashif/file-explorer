@@ -24,11 +24,28 @@ const useTraverseTree = () => {
 
             return insertNode(ob, folderId, item, isFolder);
         });
+
         return { ...tree, items: latestNode }
     }
 
+    const deleteNode = (tree, folderId) => {
+        if (!tree) return tree;
 
-    return { insertNode }
+        // Check if any of the direct children should be deleted
+        const updatedItems = tree.items
+            .map((child) => deleteNode(child, folderId))
+            .filter((child) => child !== null);
+
+        // If the current node matches the folderId, return null to delete it
+        if (tree.id === folderId) {
+            return null;
+        }
+
+        return { ...tree, items: updatedItems };
+    }
+
+
+    return { insertNode, deleteNode }
 
 }
 
