@@ -44,8 +44,15 @@ const useTraverseTree = () => {
         return { ...tree, items: updatedItems };
     }
 
+    const editNode = (tree, newName, item) => {
+        if (tree.id === item.id) {
+          return { ...tree, name: newName };
+        }
+        const updatedItems = tree.items.map((child) => editNode(child, newName, item));
+        return { ...tree, items: updatedItems };
+      };
 
-    return { insertNode, deleteNode }
+    return { insertNode, deleteNode, editNode }
 
 }
 

@@ -21,8 +21,16 @@ const inputStyles = {
   margin: "5px",
 };
 
-const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
+const FileExplorer = ({
+  handleInsertNode,
+  explorer,
+  handleDeleteNode,
+  handleEditNode,
+}) => {
   const [expand, setExpand] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [newName, setNewName] = useState(explorer.name);
+
   const [showInput, setShowInput] = useState({
     visible: false,
     isFolder: false,
@@ -51,6 +59,21 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
     handleDeleteNode(explorer?.id);
   };
 
+  const handleEdit = (e) => {
+    e.stopPropagation();
+    setEditing(true);
+  };
+  const handleEditChange = (e) => {
+    setNewName(e.target.value);
+  };
+
+  const handleEditSubmit = (e) => {
+    if (e.keyCode === 13 && newName) {
+      handleEditNode(newName,explorer);
+      setEditing(false);
+    }
+  };
+
   if (explorer.isFolder) {
     return (
       <main style={mainStyles}>
@@ -59,16 +82,26 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
           onClick={() => setExpand((prev) => !prev)}
           gap="small"
           align="center"
-          
         >
-          <p >
+          <p>
             {" "}
             {!expand ? (
               <FolderTwoTone twoToneColor="#FFDB00" />
             ) : (
               <FolderOpenTwoTone twoToneColor="#FFDB00" />
             )}
-            <span style={{ margin: "0 5px" }}>{explorer?.name}</span>
+            {editing ? (
+              <Input
+                autoFocus
+                value={newName}
+                onChange={handleEditChange}
+                onBlur={() => setEditing(false)}
+                onKeyDown={handleEditSubmit}
+                style={inputStyles}
+              />
+            ) : (
+              <span style={{ margin: "0 5px" }}>{explorer?.name}</span>
+            )}
           </p>
           <Button
             type="default"
@@ -86,10 +119,18 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
           </Button>
           <Button
             type="default"
-            icon={<DeleteTwoTone />}
+            icon={<DeleteTwoTone twoToneColor="#ff0000" />}
             onClick={(e) => handleDelete(e)}
           >
             Delete
+          </Button>
+
+          <Button
+            type="default"
+            icon={<EditTwoTone   twoToneColor="#416D19"/>}
+            onClick={(e) => handleEdit(e)}
+          >
+            Edit
           </Button>
         </Flex>
         {showInput?.visible && (
@@ -100,12 +141,29 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
                 autoFocus
                 onBlur={() => setShowInput({ ...showInput, visible: false })}
                 onKeyDown={handleCreate}
+                onClick={(e) => e.stopPropagation()}
                 placeholder={
                   showInput.isFolder ? "Enter Folder Name" : "Enter File Name"
                 }
                 style={inputStyles}
               />
             </Flex>
+          </Form>
+        )}
+        {showInput?.visible && (
+          <Form>
+            <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+              <EditTwoTone twoToneColor="#416D19" />
+              <Input
+                autoFocus
+                onBlur={() => setShowInput({ ...showInput, visible: false })}
+                onKeyDown={handleCreate}
+                placeholder={
+                  showInput.isFolder ? "Enter Folder Name" : "Enter File Name"
+                }
+                style={inputStyles}
+              />
+            </div>
           </Form>
         )}
         {expand && (
@@ -115,6 +173,7 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
                 <FileExplorer
                   handleDeleteNode={handleDeleteNode}
                   handleInsertNode={handleInsertNode}
+                  handleEditNode={handleEditNode}
                   explorer={item}
                   key={item?.id}
                 />
@@ -128,9 +187,20 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
     return (
       <Flex vertical gap="small">
         <Flex align="center">
-          <p className="file" >
+          <p className="file">
             <FileTextTwoTone />
-            <span style={{ margin: "0 5px" }}>{explorer?.name}</span>
+            {editing ? (
+              <Input
+                autoFocus
+                value={newName}
+                onChange={handleEditChange}
+                onBlur={() => setEditing(false)}
+                onKeyDown={handleEditSubmit}
+                style={inputStyles}
+              />
+            ) : (
+              <span style={{ margin: "0 5px" }}>{explorer?.name}</span>
+            )}
           </p>
           <Button
             type="default"
@@ -138,6 +208,13 @@ const FileExplorer = ({ handleInsertNode, explorer, handleDeleteNode }) => {
             onClick={(e) => handleDelete(e)}
           >
             Delete
+          </Button>
+          <Button
+            type="default"
+            icon={<EditTwoTone  twoToneColor="#416D19" />}
+            onClick={(e) => handleEdit(e)}
+          >
+            Edit
           </Button>
         </Flex>
       </Flex>
@@ -163,4 +240,6 @@ FileExplorer.propTypes = {
   }),
   handleInsertNode: PropTypes.func,
   handleDeleteNode: PropTypes.func,
+  handleEditNode: PropTypes.func.isRequired,
+
 };
